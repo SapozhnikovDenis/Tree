@@ -14,9 +14,7 @@ public class Tree {
      */
     private Node root;
 
-    public Tree() {
-        root = null;
-    }
+    public Tree() {root = null;}
 
     /**
      * Метод вставки значения
@@ -27,6 +25,7 @@ public class Tree {
         Node newNode = new Node(value);
         if (root == null) {
             root = newNode;
+            return true;
         } else {
             Node current = root;
             Node parent;
@@ -48,32 +47,43 @@ public class Tree {
                 else return false;
             }
         }
-        return false;
     }
 
     /**
      * Метод вставки значения между двумя узлами
-     * @param parentValue значение узла предка
-     * @param descendantValue значения узла потомка
+     * @param descendantValue значения узла перед которым нужно вставить
      * @param insertValue значение которое надо вставить
      * @return true or false в зависимости от успеха операции
      */
-    public boolean insertPoint(int parentValue, int descendantValue, int insertValue) {
-        Node nodeParent = find(parentValue);
-        Node nodeDescendant = find(descendantValue);
-        Node nodeInsert = new Node(insertValue);
+    public boolean insertBefore(int descendantValue, int insertValue) {
+        Node nodeInsert = find(insertValue);
+        if (nodeInsert != null) return false;
+        nodeInsert = new Node(insertValue);
 
-        if (nodeDescendant == nodeParent.getLeftDescendant()) {
+        Node nodeDescendant = find(descendantValue);
+        if (nodeDescendant == null) return false;
+
+        Node nodeParent = findParent(descendantValue);
+        if (nodeParent == null) {
+            if (root.getValue() > insertValue)
+                nodeInsert.setRightDescendant(root);
+            else
+                nodeInsert.setLeftDescendant(root);
+            root = nodeInsert;
+            return true;
+        }
+
+        if (nodeDescendant == nodeParent.getLeftDescendant() && insertValue < nodeParent.getValue())
             nodeParent.setLeftDescendant(nodeInsert);
-            nodeInsert.setLeftDescendant(nodeDescendant);
-            return true;
-        }
-        else if (nodeDescendant == nodeParent.getRightDescendant()) {
+        else if (nodeDescendant == nodeParent.getRightDescendant() && insertValue > nodeParent.getValue())
             nodeParent.setRightDescendant(nodeInsert);
-            nodeInsert.setRightDescendant(nodeDescendant);
-            return true;
-        }
         else return false;
+
+        if (nodeDescendant.getValue() > insertValue)
+            nodeInsert.setRightDescendant(nodeDescendant);
+        else nodeInsert.setLeftDescendant(nodeDescendant);
+
+        return true;
     }
 
     /**
@@ -98,8 +108,8 @@ public class Tree {
      */
     public Tree balance() {
         Tree tree = new Tree();
-        Random random = new Random();
-        ArrayList<Integer> array = new ArrayList<>();
+        final Random random = new Random();
+        ArrayList<Integer> array = new ArrayList<Integer>();
 
         String in = toString();
         String split[] = in.split(" ");
@@ -108,15 +118,13 @@ public class Tree {
             if (s.matches("[0-9]+")) array.add(Integer.parseInt(s));
         }
         array.sort(new Comparator<Integer>() {
-            @Override
             public int compare(Integer o1, Integer o2) {
                 return random.nextInt(2) - 1;
             }
         });
 
-        ArrayList<Integer> copyArray = new ArrayList<>(array);
+        ArrayList<Integer> copyArray = new ArrayList<Integer>(array);
         copyArray.sort(new Comparator<Integer>() {
-            @Override
             public int compare(Integer o1, Integer o2) {
                 if (o1 < o2) return -1;
                 else if (o1 == o2) return 0;
@@ -135,84 +143,32 @@ public class Tree {
      * @return true or false в зависимости от успеха операции
      */
     public boolean delete(int value) {
-        Node current = root;
-        Node parent = root;
-        boolean isLeftChild = true;
-
-        while (current.getValue() != value) {
-            parent = current;
-            if (value < current.getValue()) {
-                isLeftChild = true;
-                current = current.getLeftDescendant();
-            } else {
-                isLeftChild = false;
-                current = current.getRightDescendant();
-            }
-            if (current == null) {
-                return false;
-            }
+        Node node = find(value);
+        if (node != null) {
+            recursiveDelete(node);
+//          System.out.println(value);
+            Node nodeParent = findParent(value);
+            if (nodeParent == null) root = null;
+            else if (nodeParent.getRightDescendant() != null && nodeParent.getRightDescendant().getValue() == value) nodeParent.setRightDescendant(null);
+            else if (nodeParent.getLeftDescendant() != null && nodeParent.getLeftDescendant().getValue() == value) nodeParent.setLeftDescendant(null);
+            return true;
         }
-        if (current.getLeftDescendant() == null && current.getRightDescendant() == null) {
-            if (current == root) {
-                root = null;
-            } else if (isLeftChild) {
-                parent.setLeftDescendant(null);
-            } else {
-                parent.setRightDescendant(null);
-            }
-        } else if (current.getRightDescendant() == null) {
-            if (current == root) {
-                root = current.getLeftDescendant();
-            } else if (isLeftChild) {
-                parent.setLeftDescendant(current.getLeftDescendant());
-            } else {
-                parent.setRightDescendant(current.getLeftDescendant());
-            }
-        } else if (current.getLeftDescendant() == null) {
-            if (current == root) {
-                root = current.getRightDescendant();
-            } else if (isLeftChild) {
-                parent.setLeftDescendant(current.getRightDescendant());
-            } else {
-                parent.setRightDescendant(current.getRightDescendant());
-            }
-        } else {
-            Node successor = getSuccessor(current);
-            if (current == root) {
-                root = successor;
-                successor.setLeftDescendant(current.getLeftDescendant());
-            } else if(isLeftChild) {
-                successor.setLeftDescendant(current.getLeftDescendant());
-                parent.setLeftDescendant(successor);
-            } else {
-                successor.setLeftDescendant(current.getLeftDescendant());
-                parent.setRightDescendant(successor);
-            }
-        }
-        return true;
+        else return false;
     }
 
-    /**
-     * Метод помощник методу delete, поиск наименьшего значения от правой ветки
-     * @param node узел который собираемся удалять
-     * @return узел которым можно будет заменить пустое место
-     */
-    private Node getSuccessor(Node node) {
-        Node successorParent = node;
-        Node successor = node;
-        Node current = node.getRightDescendant();
-        while (current != null) {
-            successorParent = successor;
-            successor = current;
-            current = current.getLeftDescendant();
+    private void recursiveDelete(Node node) {
+        for (int i = 10; i > 0; i --) {    //захуярить число
+            if (node.getRightDescendant() != null) {
+                recursiveDelete(node.getRightDescendant());
+//              System.out.println(node.getValue());
+                node.setRightDescendant(null);
+            }
+            if (node.getLeftDescendant() != null) {
+                recursiveDelete(node.getLeftDescendant());
+//              System.out.println(node.getValue());
+                node.setLeftDescendant(null);
+            }
         }
-
-        if (successor != node.getRightDescendant()) {
-            successorParent.setLeftDescendant(successor.getRightDescendant());
-            successor.setRightDescendant(node.getRightDescendant());
-        }
-
-        return successor;
     }
 
     /**
@@ -235,6 +191,34 @@ public class Tree {
         return node;
     }
 
+    /**
+     * Поиск родителя узла в дереве
+     * @param value значение у которого нужно найти родителя
+     * @return найденый узел. !!WARNING!! узел может оказаться пустым.
+     */
+    private Node findParent(int value) {
+        Node node = root;
+        while (true) {
+            if (node.getValue() == value) {
+                node = null;
+                break;
+            }
+            else if (node.getLeftDescendant() != null && node.getLeftDescendant().getValue() == value) break;
+            else if (node.getRightDescendant() != null && node.getRightDescendant().getValue() == value) break;
+            else {
+                if (value < node.getValue()) {
+                    node = node.getLeftDescendant();
+                } else {
+                    node = node.getRightDescendant();
+                }
+                if (node == null) {
+                    break;
+                }
+            }
+        }
+        return node;
+
+    }
 
     @Override
     public String toString() {

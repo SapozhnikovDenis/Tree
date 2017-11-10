@@ -2,6 +2,7 @@ package ru.homework.model;
 
 import org.apache.log4j.Logger;
 import ru.homework.controller.Controller;
+import ru.homework.model.constant.Constant;
 import ru.homework.view.View;
 
 import java.util.Random;
@@ -10,59 +11,76 @@ import java.util.Random;
  * Класс обрабатывающий информацию
  */
 public class Model {
-    private static Random random = new Random();
-    private static Tree tree = new Tree();
-    private static final Logger log = Logger.getLogger(Model.class);
+    private Random random = new Random();
+    private final Logger log = Logger.getLogger(Model.class);
+    private Constant constant = new Constant();
+    private Tree tree = new Tree();
+    private View view = new View();
+    private Controller controller = new Controller();
 
     /**
-     * Запуск
+     * В методе решается заполнить деврево рандомными числами или с консоли
      */
-    public static void work() {
-        View.show(Constant.MAYBE_FULL_TREE);
-        int in = Controller.readConsole();
+    public void start() {
+        view.show(constant.MAYBE_FULL_TREE);
+        int in = controller.readConsole();
         if (in == 1) {
             tree.insert(random.nextInt(100) + 50);
-            for (int i = random.nextInt(10) + 5; i > 0; i--) tree.insert(random.nextInt(200));
+            for (int i = 10; i > 0; i--) tree.insert(random.nextInt(200));
 
         } else if (in != 0 && in != 1) {
             error();
-            work();
+            start();
         }
+        work();
+    }
+
+    /**
+     * В методе происходит вся работа
+     */
+    public void work() {
         while (true) {
-            View.show(Constant.OPERATION_INSERT, Constant.OPERATION_INSERT_POINT, Constant.OPERATION_UPDATE,
-                    Constant.OPERATION_DELETE, Constant.OPERATION_SELECT, Constant.OPERATION_BALANCE, Constant.OFF);
+            view.show(constant.OPERATION_INSERT, constant.OPERATION_INSERT_BEFORE, constant.OPERATION_UPDATE,
+                    constant.OPERATION_DELETE, constant.OPERATION_SELECT, constant.OPERATION_BALANCE, constant.OFF);
 
-            in = Controller.readConsole();
+            int in = controller.readConsole();
 
-            if (in < 0 || in > 6) error();
-            else {
-                switch (in) {
-                    case 0:
-                        View.show(Constant.ANSWER_OPERATION_INSERT);
-                        if(!tree.insert(Controller.readConsole())) error();
-                        break;
-                    case 1:
-                        View.show(Constant.ANSWER_OPERATION_INSERT_POINT);
-                        if (!tree.insertPoint(Controller.readConsole(), Controller.readConsole(), Controller.readConsole())) error();
-                        break;
-                    case 2:
-                        View.show(Constant.ANSWER_OPERATION_UPDATE);
-                        if (!tree.update(Controller.readConsole(), Controller.readConsole())) error();
-                        break;
-                    case 3:
-                        View.show(Constant.ANSWER_OPERATION_DELETE);
-                        if(!tree.delete(Controller.readConsole())) error();
-                        break;
-                    case 4:
-                        View.show(tree.toString());
-                        break;
-                    case 5:
-                        tree = tree.balance();
-                        break;
-                    case 6:
-                        System.exit(0);
-                        break;
-                }
+            switch (in) {
+                case 0:
+                    view.show(constant.ANSWER_OPERATION_INSERT);
+                    if (!tree.insert(controller.readConsole())) error();
+                    else log.debug("добавили узел");
+                    break;
+                case 1:
+                    view.show(constant.ANSWER_OPERATION_INSERT_BEFORE);
+                    if (!tree.insertBefore(controller.readConsole(), controller.readConsole())) error();
+                    else log.debug("добавили узел");
+                    break;
+                case 2:
+                    view.show(constant.ANSWER_OPERATION_UPDATE);
+                    if (!tree.update(controller.readConsole(), controller.readConsole())) error();
+                    else log.debug("обновили узел");
+                    break;
+                case 3:
+                    view.show(constant.ANSWER_OPERATION_DELETE);
+                    if (!tree.delete(controller.readConsole())) error();
+                    else log.debug("удалили узел");
+                    break;
+                case 4:
+                    view.show(tree.toString());
+                    log.debug("отобразили дерево");
+                    break;
+                case 5:
+                    tree = tree.balance();
+                    log.debug("сбалансировали дерево");
+                    break;
+                case 6:
+                    log.debug("выключили программу");
+                    System.exit(0);
+                    break;
+                default:
+                    error();
+                    break;
             }
         }
     }
@@ -70,8 +88,8 @@ public class Model {
     /**
      * Метод пишущий ошибки в лог файл
      */
-    public static void error() {
-        View.show(Constant.ERROR);
+    public void error() {
+        view.show(constant.ERROR, "");
         log.error("Пользователь ввел недопустимое значение");
     }
 }

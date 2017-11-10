@@ -8,13 +8,13 @@ import java.io.InputStreamReader;
  * Класс который читает с консоли
  */
 public class Controller {
-    private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
     /**
      * Метод который считывает с консоли
      * @return число которое считал или Integer.MAX_VALUE если пользователь ввел некоректные данные;
      */
-    public static int readConsole(){
+    public int readConsole(){
         int ret;
         try {
             ret = Integer.parseInt(reader.readLine());
