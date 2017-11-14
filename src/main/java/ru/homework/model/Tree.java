@@ -2,7 +2,6 @@ package ru.homework.model;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Random;
 import java.util.Stack;
 
 /**
@@ -13,6 +12,7 @@ public class Tree {
      * Корень дерева
      */
     private Node root;
+    private int size;
 
     public Tree() {root = null;}
 
@@ -22,11 +22,15 @@ public class Tree {
      * @return true or false в зависимости от успеха операции
      */
     public boolean insert(int value) {
-        Node newNode = new Node(value);
+        Node find = find(value);
         if (root == null) {
-            root = newNode;
+            root = new Node(value);
+            size++;
             return true;
-        } else {
+        }
+        else if (find != null) return false;
+        else {
+            Node newNode = new Node(value);
             Node current = root;
             Node parent;
             while (true) {
@@ -35,12 +39,14 @@ public class Tree {
                     current = current.getLeftDescendant();
                     if (current == null) {
                         parent.setLeftDescendant(newNode);
+                        size++;
                         return true;
                     }
                 } else if (value > current.getValue()){
                     current = current.getRightDescendant();
                     if (current == null) {
                         parent.setRightDescendant(newNode);
+                        size++;
                         return true;
                     }
                 }
@@ -56,6 +62,8 @@ public class Tree {
      * @return true or false в зависимости от успеха операции
      */
     public boolean insertBefore(int descendantValue, int insertValue) {
+        if (root == null) return false;
+
         Node nodeInsert = find(insertValue);
         if (nodeInsert != null) return false;
         nodeInsert = new Node(insertValue);
@@ -70,6 +78,7 @@ public class Tree {
             else
                 nodeInsert.setLeftDescendant(root);
             root = nodeInsert;
+            size++;
             return true;
         }
 
@@ -94,7 +103,9 @@ public class Tree {
      */
     public boolean update(int inValue, int update) {
         Node node = find(inValue);
-        if (node != null && (node.getLeftDescendant() == null || node.getLeftDescendant().getValue() < update)
+        Node check = find(update);
+        if (check == null && node != null &&
+                (node.getLeftDescendant() == null || node.getLeftDescendant().getValue() < update)
                 && (node.getRightDescendant() == null || node.getRightDescendant().getValue() > update)) {
             node.setValue(update);
             return true;
@@ -104,11 +115,10 @@ public class Tree {
 
     /**
      * Псевдо-балансировка дерева
-     * @return псевдо-сбаласированое дерево
+     * @return сбаласированое дерево
      */
     public Tree balance() {
         Tree tree = new Tree();
-        final Random random = new Random();
         ArrayList<Integer> array = new ArrayList<Integer>();
 
         String in = toString();
@@ -117,11 +127,6 @@ public class Tree {
         for (String s: split) {
             if (s.matches("[0-9]+")) array.add(Integer.parseInt(s));
         }
-        array.sort(new Comparator<Integer>() {
-            public int compare(Integer o1, Integer o2) {
-                return random.nextInt(2) - 1;
-            }
-        });
 
         ArrayList<Integer> copyArray = new ArrayList<Integer>(array);
         copyArray.sort(new Comparator<Integer>() {
@@ -146,28 +151,34 @@ public class Tree {
         Node node = find(value);
         if (node != null) {
             recursiveDelete(node);
-//          System.out.println(value);
             Node nodeParent = findParent(value);
+
             if (nodeParent == null) root = null;
-            else if (nodeParent.getRightDescendant() != null && nodeParent.getRightDescendant().getValue() == value) nodeParent.setRightDescendant(null);
-            else if (nodeParent.getLeftDescendant() != null && nodeParent.getLeftDescendant().getValue() == value) nodeParent.setLeftDescendant(null);
+            else if (nodeParent.getRightDescendant() != null
+                    && nodeParent.getRightDescendant().getValue() == value)
+                nodeParent.setRightDescendant(null);
+            else if (nodeParent.getLeftDescendant() != null
+                    && nodeParent.getLeftDescendant().getValue() == value)
+                nodeParent.setLeftDescendant(null);
+
+            size++;
             return true;
         }
         else return false;
     }
 
+    /**
+     * Метод рекурсивного удаления всех узлов вниз по иерархии
+     * @param node узел от которого нужно начать удалять
+     */
     private void recursiveDelete(Node node) {
-        for (int i = 10; i > 0; i --) {    //захуярить число
-            if (node.getRightDescendant() != null) {
-                recursiveDelete(node.getRightDescendant());
-//              System.out.println(node.getValue());
-                node.setRightDescendant(null);
-            }
-            if (node.getLeftDescendant() != null) {
-                recursiveDelete(node.getLeftDescendant());
-//              System.out.println(node.getValue());
-                node.setLeftDescendant(null);
-            }
+        if (node.getRightDescendant() != null) {
+            recursiveDelete(node.getRightDescendant());
+            node.setRightDescendant(null);
+        }
+        if (node.getLeftDescendant() != null) {
+            recursiveDelete(node.getLeftDescendant());
+            node.setLeftDescendant(null);
         }
     }
 
@@ -177,6 +188,7 @@ public class Tree {
      * @return найденый узел. !!WARNING!! узел может оказаться пустым.
      */
     private Node find(int value) {
+        if (root == null) return null;
         Node node = root;
         while (node.getValue() != value) {
             if (value < node.getValue()) {
@@ -220,13 +232,17 @@ public class Tree {
 
     }
 
+    /**
+     * Строчное представление дерева
+     * @return строку в которой расположенно все дерево
+     */
     @Override
     public String toString() {
         String output = "";
 
         Stack<Node> globalStack = new Stack<Node>();
         globalStack.push(root);
-        int nBlanks = 50;
+        int nBlanks = 5 * size;
         boolean isRowEmpty = false;
 
         while (!isRowEmpty) {
@@ -248,7 +264,7 @@ public class Tree {
                         isRowEmpty = false;
                     }
                 } else {
-                    output += "_";
+                    output += "-";
                     localStack.push(null);
                     localStack.push(null);
                 }
@@ -267,4 +283,5 @@ public class Tree {
 
         return output + "___________________________________________________________________________________________________________________________________________\n";
     }
+
 }

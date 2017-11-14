@@ -3,7 +3,6 @@ package ru.homework;
 import ru.homework.model.Model;
 
 public class Main {
-
     /**
      * Стартовая точка праграммы
      */
