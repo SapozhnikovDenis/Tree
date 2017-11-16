@@ -238,7 +238,7 @@ public class Tree {
      */
     @Override
     public String toString() {
-        String output = "";
+        String output = "___________________________________________________________________________________________________________________________________________\n";
 
         Stack<Node> globalStack = new Stack<Node>();
         globalStack.push(root);

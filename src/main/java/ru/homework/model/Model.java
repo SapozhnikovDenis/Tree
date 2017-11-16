@@ -22,11 +22,15 @@ public class Model {
      * В методе решается заполнить деврево рандомными числами или с консоли
      */
     public void start() {
+        log.debug("запустили программу");
         view.show(constant.MAYBE_FULL_TREE);
         int in = controller.read();
         if (in == 1) {
             tree.insert(random.nextInt(10) + 40);
-            for (int i = 10; i > 0; i--) tree.insert(random.nextInt(99));
+            for (int i = 10; i > 0; i--) {
+                tree.insert(random.nextInt(99));
+            }
+            log.debug("пользователь заполнил дерево рандомными значениями");
 
         } else if (in != 0 && in != 1) {
             error();
