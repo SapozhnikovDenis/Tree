@@ -65,32 +65,37 @@ public class Tree {
         if (root == null) return false;
 
         Node nodeInsert = find(insertValue);
-        if (nodeInsert != null) return false;
+        if (nodeInsert != null) { return false; }
         nodeInsert = new Node(insertValue);
 
         Node nodeDescendant = find(descendantValue);
-        if (nodeDescendant == null) return false;
+        if (nodeDescendant == null) { return false; }
 
         Node nodeParent = findParent(descendantValue);
         if (nodeParent == null) {
-            if (root.getValue() > insertValue)
+            if (root.getValue() > insertValue) {
                 nodeInsert.setRightDescendant(root);
-            else
+            }
+            else {
                 nodeInsert.setLeftDescendant(root);
+            }
             root = nodeInsert;
             size++;
             return true;
         }
 
-        if (nodeDescendant == nodeParent.getLeftDescendant() && insertValue < nodeParent.getValue())
+        if (nodeDescendant == nodeParent.getLeftDescendant() && insertValue < nodeParent.getValue()) {
             nodeParent.setLeftDescendant(nodeInsert);
-        else if (nodeDescendant == nodeParent.getRightDescendant() && insertValue > nodeParent.getValue())
+        }
+        else if (nodeDescendant == nodeParent.getRightDescendant() && insertValue > nodeParent.getValue()) {
             nodeParent.setRightDescendant(nodeInsert);
-        else return false;
+        }
+        else { return false; }
 
-        if (nodeDescendant.getValue() > insertValue)
+        if (nodeDescendant.getValue() > insertValue) {
             nodeInsert.setRightDescendant(nodeDescendant);
-        else nodeInsert.setLeftDescendant(nodeDescendant);
+        }
+        else { nodeInsert.setLeftDescendant(nodeDescendant);}
 
         return true;
     }
@@ -138,7 +143,7 @@ public class Tree {
         });
 
         tree.insert(copyArray.get(copyArray.size() / 2));
-        for (Integer i: array) tree.insert(i);
+        for (Integer i: array) { tree.insert(i); }
         return tree;
     }
 
@@ -155,16 +160,18 @@ public class Tree {
 
             if (nodeParent == null) root = null;
             else if (nodeParent.getRightDescendant() != null
-                    && nodeParent.getRightDescendant().getValue() == value)
+                    && nodeParent.getRightDescendant().getValue() == value) {
                 nodeParent.setRightDescendant(null);
+            }
             else if (nodeParent.getLeftDescendant() != null
-                    && nodeParent.getLeftDescendant().getValue() == value)
+                    && nodeParent.getLeftDescendant().getValue() == value) {
                 nodeParent.setLeftDescendant(null);
+            }
 
             size++;
             return true;
         }
-        else return false;
+        else { return false; }
     }
 
     /**
@@ -193,12 +200,9 @@ public class Tree {
         while (node.getValue() != value) {
             if (value < node.getValue()) {
                 node = node.getLeftDescendant();
-            } else {
-                node = node.getRightDescendant();
-            }
-            if (node == null) {
-                break;
-            }
+            } else { node = node.getRightDescendant(); }
+
+            if (node == null) { break; }
         }
         return node;
     }
@@ -215,17 +219,14 @@ public class Tree {
                 node = null;
                 break;
             }
-            else if (node.getLeftDescendant() != null && node.getLeftDescendant().getValue() == value) break;
-            else if (node.getRightDescendant() != null && node.getRightDescendant().getValue() == value) break;
+            else if (node.getLeftDescendant() != null && node.getLeftDescendant().getValue() == value) { break; }
+            else if (node.getRightDescendant() != null && node.getRightDescendant().getValue() == value) { break; }
             else {
                 if (value < node.getValue()) {
                     node = node.getLeftDescendant();
-                } else {
-                    node = node.getRightDescendant();
-                }
-                if (node == null) {
-                    break;
-                }
+                } else { node = node.getRightDescendant(); }
+
+                if (node == null) { break; }
             }
         }
         return node;
