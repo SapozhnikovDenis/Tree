@@ -68,7 +68,7 @@ public class ActionServlet extends HttpServlet {
         while (flds.hasMoreElements()) {
             String str = (String) flds.nextElement();
             switch (str) {
-                case "yes":
+                case "no":
                     tree.insert(random.nextInt(15) + 45);
                     for (int i = 7; i > 0; i--) {
                         tree.insert(random.nextInt(99));
