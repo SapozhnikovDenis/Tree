@@ -8,9 +8,6 @@ import java.util.Stack;
  * Дерево
  */
 public class Tree {
-    /**
-     * Корень дерева
-     */
     private Node root;
     private int size;
 
@@ -107,15 +104,27 @@ public class Tree {
      * @return true or false в зависимости от успеха операции
      */
     public boolean update(int inValue, int update) {
-        Node node = find(inValue);
         Node check = find(update);
-        if (check == null && node != null &&
-                (node.getLeftDescendant() == null || node.getLeftDescendant().getValue() < update)
-                && (node.getRightDescendant() == null || node.getRightDescendant().getValue() > update)) {
-            node.setValue(update);
-            return true;
+        if (check != null) return false;
+
+        Node current = find(inValue);
+        if (current == null) return false;
+
+        if (current != root) {
+            current.setValue(update);
+            if (find(update) == null) {
+                current.setValue(inValue);
+                return false;
+            }
         }
-        else return false;
+        else {
+            if ((current.getLeftDescendant() == null || current.getLeftDescendant().getValue() < update)
+                    && (current.getRightDescendant() == null || current.getRightDescendant().getValue() > update)) {
+                current.setValue(update);
+            }
+            else { return false; }
+        }
+        return true;
     }
 
     /**
@@ -130,7 +139,7 @@ public class Tree {
         String split[] = in.split(" ");
 
         for (String s: split) {
-            if (s.matches("[0-9]+")) array.add(Integer.parseInt(s));
+            if (s.matches("[0-9]+|-[0-9]+")) array.add(Integer.parseInt(s));
         }
 
         ArrayList<Integer> copyArray = new ArrayList<Integer>(array);
@@ -219,18 +228,20 @@ public class Tree {
                 node = null;
                 break;
             }
-            else if (node.getLeftDescendant() != null && node.getLeftDescendant().getValue() == value) { break; }
-            else if (node.getRightDescendant() != null && node.getRightDescendant().getValue() == value) { break; }
+            else if (node.getLeftDescendant() != null
+                    && node.getLeftDescendant().getValue() == value) { break; }
+            else if (node.getRightDescendant() != null
+                    && node.getRightDescendant().getValue() == value) { break; }
             else {
                 if (value < node.getValue()) {
                     node = node.getLeftDescendant();
-                } else { node = node.getRightDescendant(); }
+                }
+                else { node = node.getRightDescendant(); }
 
                 if (node == null) { break; }
             }
         }
         return node;
-
     }
 
     /**

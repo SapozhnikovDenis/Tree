@@ -1,6 +1,7 @@
 package ru.homework.controller;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Controller {
@@ -8,15 +9,10 @@ public class Controller {
 
     /**
      * Метод который считывает с консоли
-     * @return число которое считал или Integer.MAX_VALUE если пользователь ввел некоректные данные;
+     * @return число которое ввел пользователь
+     * @throws IOException Если возникает ошибка ввода
      */
-    public int read(){
-        int ret;
-        try {
-            ret = Integer.parseInt(reader.readLine());
-            return ret;
-        } catch (Exception e) {
-            return Integer.MAX_VALUE;
-        }
+    public int read() throws IOException {
+        return Integer.parseInt(reader.readLine());
     }
 }
